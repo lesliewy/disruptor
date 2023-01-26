@@ -16,6 +16,9 @@ public class LongEventProducer
         this.ringBuffer = ringBuffer;
     }
 
+    /**
+     * 使用事件转换器的好处，省了从 环形队列 获取 序号， 然后拿到事件 填充数据， 再发布序号 中的第二步骤
+     */
     private static final EventTranslatorOneArg<LongEvent, ByteBuffer> TRANSLATOR =
         new EventTranslatorOneArg<LongEvent, ByteBuffer>()
         {

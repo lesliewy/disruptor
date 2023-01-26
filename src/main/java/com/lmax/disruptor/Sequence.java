@@ -41,9 +41,16 @@ class RhsPadding extends Value
  * <p>Also attempts to be more efficient with regards to false
  * sharing by adding padding around the volatile field.
  */
+
+/**
+ * Sequence作用:
+ *   在RingBuffer缓冲区中，Sequence标示着写入进度，例如每次生产者要写入数据进缓冲区时，都要调用RingBuffer.next（）来获得下一个可使用的相对位置。
+ *   对于生产者和消费者来说，Sequence标示着它们的事件序号
+ */
 public class Sequence extends RhsPadding
 {
     static final long INITIAL_VALUE = -1L;
+    /** jdk 17 新增， 之前版本使用的是 Unsafe */
     private static final VarHandle VALUE_FIELD;
 
     static

@@ -19,6 +19,8 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * Access to a ThreadFactory instance. All threads are created with setDaemon(true).
+ *
+ * 这是里 enum 单例的用法.
  */
 public enum DaemonThreadFactory implements ThreadFactory
 {
