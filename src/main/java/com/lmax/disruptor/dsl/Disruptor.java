@@ -54,10 +54,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @param <T> the type of event used.
  */
+
+/**
+ * Disruptor: Disruptor的使用入口。 持有RingBuffer、消费者线程池Executor、消费者仓库ConsumerRepository等引用。
+ * Sequencer: 是 Disruptor 的真正核心。 生产者与缓存RingBuffer之间的桥梁、
+ * SequenceBarrier: 消费者 与 消费者 直接的 隔离 屏障.
+ * WaitStrategy: 定义 Consumer 如何进行等待下一个事件的策略.
+ * Event: 生产者和消费者之间进行交换的数据被称为事件(Event)。
+ * EventProcessor: 事件处理器，是消费者线程池Executor的调度单元.
+ * EventHandler: 事件处理接口，由用户实现，用于处理事件，是 Consumer 的真正实现.
+ * RingBuffer: 基于数组的缓存实现，也是创建sequencer与定义WaitStrategy的入口；
+ *
+ *
+ */
 public class Disruptor<T>
 {
     private final RingBuffer<T> ringBuffer;
     private final ThreadFactory threadFactory;
+    /** 包含消费者信息. */
     private final ConsumerRepository<T> consumerRepository = new ConsumerRepository<>();
     private final AtomicBoolean started = new AtomicBoolean(false);
     private ExceptionHandler<? super T> exceptionHandler = new ExceptionHandlerWrapper<>();
@@ -497,6 +511,7 @@ public class Disruptor<T>
         final Sequence[] processorSequences = new Sequence[eventHandlers.length];
         final SequenceBarrier barrier = ringBuffer.newBarrier(barrierSequences);
 
+        /** 每一个eventHandler都是一个消费者. */
         for (int i = 0, eventHandlersLength = eventHandlers.length; i < eventHandlersLength; i++)
         {
             final EventHandler<? super T> eventHandler = eventHandlers[i];
@@ -509,6 +524,7 @@ public class Disruptor<T>
                 batchEventProcessor.setExceptionHandler(exceptionHandler);
             }
 
+            /** 添加到消费者集合中. */
             consumerRepository.add(batchEventProcessor, eventHandler, barrier);
             processorSequences[i] = batchEventProcessor.getSequence();
         }

@@ -20,6 +20,10 @@ package com.lmax.disruptor;
  * Coordination barrier for tracking the cursor for publishers and sequence of
  * dependent {@link EventProcessor}s for processing a data structure
  */
+
+/**
+ * 消费者 之间，并不是通过 RingBuffer 进行加锁互斥 隔离，而是 通过 Sequence Barrier 来管理依赖次序关系， 从而能减少RingBuffer上的并发冲突；
+ */
 public interface SequenceBarrier
 {
     /**
