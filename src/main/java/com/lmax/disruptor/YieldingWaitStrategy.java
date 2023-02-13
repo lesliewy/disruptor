@@ -35,6 +35,11 @@ public final class YieldingWaitStrategy implements WaitStrategy
         long availableSequence;
         int counter = SPIN_TRIES;
 
+        /**
+         * 如果消费者需要消费的下一个序号超过了生产者已生产数据的最大序号，
+         * 那么消费者需要等待，否则返回生产者已生产数据的最大序号给消费者消费即可
+         * 循环中调用Thread.yield()允许其他准备好的线程执行
+         */
         while ((availableSequence = dependentSequence.get()) < sequence)
         {
             counter = applyWaitMethod(barrier, counter);

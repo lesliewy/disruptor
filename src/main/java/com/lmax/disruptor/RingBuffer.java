@@ -493,6 +493,11 @@ public final class RingBuffer<E> extends RingBufferFields<E> implements Cursored
      * @see com.lmax.disruptor.EventSink#publishEvent(com.lmax.disruptor.EventTranslatorOneArg, Object)
      * com.lmax.disruptor.EventSink#publishEvent(com.lmax.disruptor.EventTranslatorOneArg, A)
      */
+    /**
+     * 生产者发布事件:
+     * 1, 通过 Sequencer.next(n) 来预定下面 n 个可以写入的位置序号
+     * 2, 根据序号获取事件，然后修改事件数据，然后发布 event。
+     */
     @Override
     public <A> void publishEvent(final EventTranslatorOneArg<E, A> translator, final A arg0)
     {

@@ -128,6 +128,9 @@ public final class SingleProducerSequencer extends SingleProducerSequencerFields
     /**
      * @see Sequencer#next(int)
      */
+    /**
+     *
+     */
     @Override
     public long next(final int n)
     {
@@ -139,6 +142,7 @@ public final class SingleProducerSequencer extends SingleProducerSequencerFields
         long nextValue = this.nextValue;
 
         long nextSequence = nextValue + n;
+        /** 减去 bufferSize, 而不是取模: 消费者只能落后生产者一圈，不然就已经存在数据覆盖了。 */
         long wrapPoint = nextSequence - bufferSize;
         long cachedGatingSequence = this.cachedValue;
 
@@ -147,6 +151,7 @@ public final class SingleProducerSequencer extends SingleProducerSequencerFields
             cursor.setVolatile(nextValue);  // StoreLoad fence
 
             long minSequence;
+            /** 即将写入的位置上，之前的 event 还有消费者没有消费, 等待并自旋 */
             while (wrapPoint > (minSequence = Util.getMinimumSequence(gatingSequences, nextValue)))
             {
                 LockSupport.parkNanos(1L); // TODO: Use waitStrategy to spin?
@@ -237,6 +242,7 @@ public final class SingleProducerSequencer extends SingleProducerSequencerFields
     @Override
     public boolean isAvailable(final long sequence)
     {
+        /** publishEvent 的时候才会推进 cursor，所以只要 sequence<=cursor，就说明数据是可消费的 */
         final long currentSequence = cursor.get();
         return sequence <= currentSequence && sequence > currentSequence - bufferSize;
     }

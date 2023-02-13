@@ -65,6 +65,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * EventHandler: 事件处理接口，由用户实现，用于处理事件，是 Consumer 的真正实现.
  * RingBuffer: 基于数组的缓存实现，也是创建sequencer与定义WaitStrategy的入口；
  *
+ * Disruptor中,通过联合使用SequenceBarrier和Sequence, 协调和管理消费者和生产者之间的处理关系,避免了锁和CAS操作
+ * Disruptor中的各个消费者和生产者持有自己的序号Sequence,
+ *
  *
  */
 public class Disruptor<T>

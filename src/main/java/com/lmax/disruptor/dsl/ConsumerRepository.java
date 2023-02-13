@@ -33,10 +33,16 @@ import java.util.Map;
  *
  * @param <T> the type of the {@link EventHandler}
  */
+
+/**
+ * 用于维护Disruptor的所有消费者的信息
+ */
 class ConsumerRepository<T> implements Iterable<ConsumerInfo>
 {
+    /** EventHandler 到 消费者处理器 信息的映射，用于信息查询 */
     private final Map<EventHandler<?>, EventProcessorInfo<T>> eventProcessorInfoByEventHandler =
         new IdentityHashMap<>();
+    /** Sequence 到消费者信息的映射 */
     private final Map<Sequence, ConsumerInfo> eventProcessorInfoBySequence =
         new IdentityHashMap<>();
     private final Collection<ConsumerInfo> consumerInfos = new ArrayList<>();

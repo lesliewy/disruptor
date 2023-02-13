@@ -23,6 +23,8 @@ package com.lmax.disruptor;
 
 /**
  * 消费者 之间，并不是通过 RingBuffer 进行加锁互斥 隔离，而是 通过 Sequence Barrier 来管理依赖次序关系， 从而能减少RingBuffer上的并发冲突；
+ * 协调屏障: 用来跟踪发布者(publisher)的游标(cursor)和事件处理者(EventProcessor)的序列号(sequence)
+ *
  */
 public interface SequenceBarrier
 {

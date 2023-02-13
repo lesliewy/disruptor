@@ -44,8 +44,21 @@ class RhsPadding extends Value
 
 /**
  * Sequence作用:
- *   在RingBuffer缓冲区中，Sequence标示着写入进度，例如每次生产者要写入数据进缓冲区时，都要调用RingBuffer.next（）来获得下一个可使用的相对位置。
+ *   在RingBuffer缓冲区中，Sequence标示着写入进度，例如每次生产者要写入数据进缓冲区时，都要调用RingBuffer.next()来获得下一个可使用的相对位置。
  *   对于生产者和消费者来说，Sequence标示着它们的事件序号
+ *
+ * 序号Sequence需要满足以下条件:
+ * 条件一: 消费者的序号Sequence的数值必须小于生产者的序号Sequence的数值
+ * 条件二: 消费者的序号Sequence的数值必须小于依赖关系中前置的消费者的序号Sequence的数值
+ * 条件三: 生产者的序号Sequence的数值不能大于消费者正在消费的序号Sequence的数值,防止生产者速度过快,将还没有来得及消费的事件消息覆盖
+ * 条件一和条件二在SequenceBarrier中的waitFor() 方法中实现:
+ * 条件三是针对生产者建立的SequenceBarrier,逻辑判定发生在生产者从RingBuffer获取下一个可用的entry时,RingBuffer会将获取下一个可用的entry委托给Sequencer处理:
+ *
+ * Sequence是如何消除伪共享: 真正使用到的变量是Value类的value，它的前后空间都由8个long型的变量填补了，对于一个大小为64字节的缓存行，它刚好被填补满（一个long型变量value，
+ * 8个字节加上前/后个7long型变量填补，7*8=56，56+8=64字节）。
+ * 这样做每次把变量value读进高速缓存中时，都能把缓存行填充满，保证每次处理数据时都不会与其他变量发生冲突。
+ * 当然，对于大小为64个字节的缓存行来说，如果缓存行大小大于64个字节，那么还是会出现伪共享问题，但是毕竟非64个字节的Cache Line并不是当前的主流。
+ *
  */
 public class Sequence extends RhsPadding
 {

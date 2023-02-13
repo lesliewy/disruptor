@@ -29,6 +29,10 @@ import java.util.concurrent.ThreadFactory;
  *
  * @param <T> the type of the configured {@link EventHandler}
  */
+
+/**
+ * 一个单线程的消费者(只有一个EventProcessor)， 代理EventHandler，管理处理事件以外的其他事情(如：拉取事件，等待事件…)
+ */
 class EventProcessorInfo<T> implements ConsumerInfo
 {
     private final EventProcessor eventprocessor;

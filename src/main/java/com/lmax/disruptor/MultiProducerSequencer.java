@@ -108,6 +108,10 @@ public final class MultiProducerSequencer extends AbstractSequencer
     /**
      * @see Sequencer#next(int)
      */
+    /**
+     * 基本同 SingleProducerSequencer#next(int)
+     *
+     */
     @Override
     public long next(final int n)
     {
@@ -116,6 +120,7 @@ public final class MultiProducerSequencer extends AbstractSequencer
             throw new IllegalArgumentException("n must be > 0 and < bufferSize");
         }
 
+        /** 存在多个生产者竞争, 使用CAS*/
         long current = cursor.getAndAdd(n);
 
         long nextSequence = current + n;
@@ -227,6 +232,11 @@ public final class MultiProducerSequencer extends AbstractSequencer
      * buffer), when we have new data and successfully claimed a slot we can simply
      * write over the top.
      */
+    /**
+     * 设置 availableBuffer 的状态位.
+     * 给定一个 sequence，先计算出对应的数组下标 index，然后计算出在那个 index 上要写的数据 availabilityFlag，最后执行availableBuffer[index]=availabilityFlag.
+     * 根据 calculateAvailabilityFlag(sequence) 方法计算出来的 availabilityFlag 实际上是该 sequence 环绕 RingBuffer 的圈数
+     */
     private void setAvailable(final long sequence)
     {
         setAvailableBufferValue(calculateIndex(sequence), calculateAvailabilityFlag(sequence));
@@ -248,6 +258,9 @@ public final class MultiProducerSequencer extends AbstractSequencer
         return (int) AVAILABLE_ARRAY.getAcquire(availableBuffer, index) == flag;
     }
 
+    /**
+     * 消费者用来查询最高可用 event 数据的位置
+     */
     @Override
     public long getHighestPublishedSequence(final long lowerBound, final long availableSequence)
     {

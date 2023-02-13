@@ -26,6 +26,10 @@ import static com.lmax.disruptor.RewindAction.REWIND;
  *
  * @param <T> event implementation storing the data for sharing during exchange or parallel coordination of an event.
  */
+
+/**
+ * 单线程批处理消费者，同一批次添加的消费者，会消费每一个event
+ */
 public final class BatchEventProcessor<T>
     implements EventProcessor
 {
@@ -126,6 +130,7 @@ public final class BatchEventProcessor<T>
         {
             sequenceBarrier.clearAlert();
 
+            /** handler的一个切入点, 由用户自定义, 默认是空的. */
             notifyStart();
             try
             {

@@ -30,6 +30,10 @@ public final class BlockingWaitStrategy implements WaitStrategy
         throws AlertException, InterruptedException
     {
         long availableSequence;
+        /**
+         * cursorSequence:生产者的序号
+         * 第一重条件判断：如果消费者消费速度，大于生产者生产速度（即消费者要消费的下一个数据已经大于生产者生产的数据时），那么消费者等待一下
+         */
         if (cursorSequence.get() < sequence)
         {
             synchronized (mutex)
@@ -42,6 +46,12 @@ public final class BlockingWaitStrategy implements WaitStrategy
             }
         }
 
+        /**
+         * 第二重条件判断：自旋等待
+         * 即当前消费者线程要消费的下一个sequence，大于其前面执行链路（若有依赖关系）的任何一个消费者最小sequence（dependentSequence.get()），
+         * 那么这个消费者要自旋等待，直到前面执行链路（若有依赖关系）的任何一个消费者最小sequence（dependentSequence.get()）已经大于等于当前消费者的sequence时，
+         * 说明前面执行链路的消费者已经消费完了
+         */
         while ((availableSequence = dependentSequence.get()) < sequence)
         {
             barrier.checkAlert();
@@ -51,6 +61,9 @@ public final class BlockingWaitStrategy implements WaitStrategy
         return availableSequence;
     }
 
+    /**
+     * 如果生产者新生产一个元素，那么唤醒所有消费者
+     */
     @Override
     public void signalAllWhenBlocking()
     {
